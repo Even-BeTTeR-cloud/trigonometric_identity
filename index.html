@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>삼각함수 덧셈정리 알아가기</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --bg: #fafaf8;
+    --panel: #ffffff;
+    --border: #e0ddd6;
+    --blue: #2563eb;
+    --orange: #d97706;
+    --red: #dc2626;
+    --green: #16a34a;
+    --gold: #b45309;
+    --gray-line: #9ca3af;
+    --text: #1a1a1a;
+    --muted: #6b7280;
+    --shadow: rgba(0,0,0,0.07);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Serif KR', serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    width: 100%;
+    padding: 14px 28px;
+    background: var(--panel);
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    box-shadow: 0 1px 4px var(--shadow);
+  }
+  header h1 { font-size: 1.08rem; font-weight: 700; }
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    background: #eff6ff;
+    color: var(--blue);
+    border: 1px solid #bfdbfe;
+    border-radius: 4px;
+    padding: 3px 9px;
+  }
+
+  .main {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 560px;
+    padding: 20px 20px 0;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .canvas-wrap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  canvas {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    display: block;
+    max-width: 100%;
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+
+  /* legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+  }
+  .leg-line { width: 24px; height: 3px; border-radius: 2px; }
+
+  /* toggles */
+  .toggle-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .toggle-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .toggle-btn.on {
+    border-color: var(--blue);
+    background: #eff6ff;
+    color: var(--blue);
+  }
+
+  /* right panel */
+  .right-panel {
+    width: 300px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 1px 6px var(--shadow);
+  }
+  .card-title {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--muted);
+    margin-bottom: 11px;
+  }
+
+  /* sliders */
+  .slider-item { display:flex; flex-direction:column; gap:6px; margin-bottom:11px; }
+  .slider-item:last-child { margin-bottom:0; }
+  .slider-lbl { display:flex; justify-content:space-between; align-items:center; }
+  .slider-name { font-family:'JetBrains Mono',monospace; font-size:.88rem; font-weight:600; }
+  .slider-num  { font-family:'JetBrains Mono',monospace; font-size:.75rem; color:var(--muted); }
+
+  input[type=range] {
+    width:100%; height:4px;
+    -webkit-appearance:none; appearance:none;
+    border-radius:2px; outline:none; cursor:pointer;
+  }
+  input[type=range].rx {
+    background:linear-gradient(to right, var(--blue) 0%, var(--blue) var(--pct,50%), #dbeafe var(--pct,50%), #dbeafe 100%);
+  }
+  input[type=range].ry {
+    background:linear-gradient(to right, var(--orange) 0%, var(--orange) var(--pct,50%), #fef3c7 var(--pct,50%), #fef3c7 100%);
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance:none; width:15px; height:15px;
+    border-radius:50%; border:2px solid #fff; cursor:pointer;
+    box-shadow:0 1px 4px rgba(0,0,0,0.2);
+  }
+  input[type=range].rx::-webkit-slider-thumb { background:var(--blue); }
+  input[type=range].ry::-webkit-slider-thumb { background:var(--orange); }
+
+  /* values */
+  .vals-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+  .val-box {
+    background:#f9fafb;
+    border:1px solid var(--border);
+    border-radius:7px;
+    padding:9px 11px;
+  }
+  .vbl { font-size:.62rem; color:var(--muted); margin-bottom:3px; font-family:'JetBrains Mono',monospace; }
+  .vbv { font-family:'JetBrains Mono',monospace; font-size:.86rem; font-weight:600; }
+
+  /* insight */
+  .insight-card {
+    background: var(--panel);
+    border: 1.5px solid var(--border);
+    border-left: 4px solid var(--red);
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 1px 6px var(--shadow);
+  }
+  .insight-title {
+    font-size:.65rem; text-transform:uppercase;
+    letter-spacing:1.4px; color:var(--red);
+    font-weight:700; margin-bottom:9px;
+  }
+  .ks {
+    display:flex; align-items:flex-start; gap:8px;
+    padding:7px 9px; border-radius:6px;
+    background:#f9fafb; margin-bottom:6px;
+  }
+  .ks:last-child { margin-bottom:0; }
+  .ksdot { width:9px; height:9px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+  .kstxt { font-size:.76rem; line-height:1.55; }
+
+  /* formula */
+  .formula-area {
+    background: var(--panel);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 1px 6px var(--shadow);
+  }
+  .seg-row {
+    display:flex; align-items:center; gap:8px;
+    padding:9px 11px; border-radius:7px; margin-bottom:6px;
+  }
+  .seg-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .seg-name { font-family:'JetBrains Mono',monospace; font-size:.8rem; font-weight:600; min-width:28px; }
+  .seg-desc { font-size:.74rem; color:var(--muted); flex:1; }
+  .seg-val  { font-family:'JetBrains Mono',monospace; font-size:.8rem; font-weight:600; }
+
+  .formula-final {
+    margin-top:12px; padding:13px;
+    background:#fffbeb; border:1.5px solid #fde68a;
+    border-radius:8px; text-align:center;
+  }
+  .feq  { font-family:'JetBrains Mono',monospace; font-size:.88rem; font-weight:600; color:var(--gold); }
+  .feq2 { font-family:'JetBrains Mono',monospace; font-size:.88rem; font-weight:600; color:var(--green); margin-top:5px; }
+
+  footer {
+    width:100%; text-align:center;
+    padding:16px; font-size:.65rem; color:var(--muted);
+    margin-top:20px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>삼각함수 덧셈정리 알아가기</h1>
+  <span class="badge">직각삼각형 구성 탐구</span>
+</header>
+
+<div class="main">
+
+  <!-- Canvas -->
+  <div class="canvas-wrap">
+    <canvas id="cvs" width="500" height="560"></canvas>
+
+    <div class="legend">
+      <div class="legend-item"><div class="leg-line" style="background:#dc2626;height:4px"></div>DE ← 핵심변</div>
+      <div class="legend-item"><div class="leg-line" style="background:#2563eb;height:4px"></div>AB ← 핵심변</div>
+      <div class="legend-item"><div class="leg-line" style="background:#16a34a;height:4px"></div>EC ← 핵심변</div>
+      <div class="legend-item"><div class="leg-line" style="background:#9ca3af"></div>기타 변</div>
+    </div>
+
+    <div class="toggle-row">
+      <button class="toggle-btn on" id="btn-labels" onclick="tog('labels')">점 이름</button>
+      <button class="toggle-btn on" id="btn-angles" onclick="tog('angles')">각도 표시</button>
+      <button class="toggle-btn on" id="btn-aux"    onclick="tog('aux')">보조선</button>
+    </div>
+  </div>
+
+  <!-- Slider panel (below canvas, inline) -->
+  <div class="card" style="width:100%;max-width:500px;margin:0 auto;">
+    <div class="card-title">각도 조절</div>
+    <div class="slider-item">
+      <div class="slider-lbl">
+        <span class="slider-name" style="color:var(--blue)">x (큰 각)</span>
+        <span class="slider-num" id="vx">60°</span>
+      </div>
+      <input type="range" class="rx" id="slx" min="10" max="80" value="60" step="1">
+    </div>
+    <div class="slider-item">
+      <div class="slider-lbl">
+        <span class="slider-name" style="color:var(--orange)">y (작은 각)</span>
+        <span class="slider-num" id="vy">25°</span>
+      </div>
+      <input type="range" class="ry" id="sly" min="1" max="59" value="25" step="1">
+    </div>
+  </div>
+</div>
+
+<footer>수학과제탐구 · 삼각함수의 덧셈정리 발견 활동</footer>
+
+<script>
+const cvs = document.getElementById('cvs');
+const ctx  = cvs.getContext('2d');
+
+// ─────────────────────────────────────────────────────
+// 구조: A = 왼쪽 아래 꼭짓점
+//   AB = 시초선 (오른쪽 수평, 아래변)
+//   각 x : AB에서 시계방향(위쪽)으로 → AE 방향  (AE = 1)
+//   각 y : AB에서 시계방향(위쪽)으로, y < x     → AF 방향 (AF = cosy, EF⊥AF)
+//
+//   canvas 좌표계: y축이 아래 방향이므로
+//   "시계방향으로 각도 θ" = 수평(오른쪽)에서 위쪽 = canvas에서 -θ (y감소 방향)
+//
+//   점 좌표 (A를 원점으로, R = scale):
+//   E = A + R*(cos x,  -sin x)   ← 각 x 시계방향
+//   F = A + R*(cos y,  -sin y) * cosy 만큼  = A + R*cosy*(cos y, -sin y)
+//     → F = (A.x + R*cos²y,  A.y - R*cosy*siny)
+//   EF ⊥ AF at F, EF = siny (길이)
+//
+//   직사각형 ABCD:
+//   B = (A.x + AB_len*R,  A.y)         AB_len = sinx*cosy
+//   C = (B.x,  A.y - BC_len*R)         BC_len = cosx*cosy + sinx*siny = cos(x-y)
+//   D = (A.x,  A.y - BC_len*R)
+//   E = (A.x + DE_len*R,  A.y - BC_len*R)   DE_len = sinx*cosy - cosx*siny = sin(x-y)
+//   G = (E.x,  A.y)   (E에서 수선의 발)
+// ─────────────────────────────────────────────────────
+
+let angX = 60, angY = 25;
+const opts = { labels:true, angles:true, aux:true };
+
+function tog(k) {
+  opts[k] = !opts[k];
+  document.getElementById('btn-'+k).classList.toggle('on', opts[k]);
+  draw();
+}
+
+const slx = document.getElementById('slx');
+const sly = document.getElementById('sly');
+
+function updSlider(el) {
+  const p = ((el.value - el.min)/(el.max - el.min)*100).toFixed(1)+'%';
+  el.style.setProperty('--pct', p);
+}
+
+slx.addEventListener('input', () => {
+  angX = +slx.value;
+  if (angY >= angX) { angY = angX - 1; sly.value = angY; }
+  sly.max = angX - 1;
+  updSlider(slx); updSlider(sly);
+  draw();
+});
+sly.addEventListener('input', () => { angY = +sly.value; updSlider(sly); draw(); });
+slx.value = angX; sly.value = angY; sly.max = angX - 1;
+updSlider(slx); updSlider(sly);
+
+function draw() {
+  const W = cvs.width, H = cvs.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const xr = angX * Math.PI / 180;
+  const yr = angY * Math.PI / 180;
+  const sx = Math.sin(xr), cx_ = Math.cos(xr);
+  const sy = Math.sin(yr), cy_ = Math.cos(yr);
+
+  // 변의 길이 (AE = 1 단위)
+  const AB_len = sx * cy_;            // sinxcosy  (아래변)
+  const BC_len = cx_ * cy_ + sx * sy; // cos(x-y)  (오른쪽 변 = 높이)
+  const DE_len = sx * cy_ - cx_ * sy; // sin(x-y)  (위변 왼쪽)
+  const EC_len = cx_ * sy;            // cosxsiny  (위변 오른쪽)
+  const BF_len = cx_ * cy_;           // cosxcosy  (오른쪽 아래)
+  const FC_len = sx * sy;             // sinxsiny  (오른쪽 위)
+
+  // 화면 배율 (직사각형이 캔버스 안에 맞게)
+  const margin = 62;
+  const R = (Math.min(W, H) - margin * 2 - 40) / Math.max(AB_len, BC_len);
+
+  // A = 왼쪽 아래
+  const Ax = margin, Ay = H - margin - 10;
+
+  // 픽셀 변환: 오른쪽 = +x, 위쪽 = -y(canvas)
+  const pt = (rx, ry) => [Ax + rx * R, Ay - ry * R];
+
+  // 좌표 계산
+  const A = pt(0,       0);
+  const B = pt(AB_len,  0);
+  const C = pt(AB_len,  BC_len);
+  const D = pt(0,       BC_len);
+  const E = pt(DE_len,  BC_len);   // 위변: D에서 DE_len 오른쪽
+  const F = pt(AB_len,  BF_len);   // 오른쪽 변: B에서 BF_len 위
+  const G = pt(DE_len,  0);        // E 수직 아래 (수선의 발)
+
+  // AE 방향 = 각 x (AB 시초선에서 시계방향 = 위쪽)
+  // canvas에서: E는 A보다 오른쪽+위 → 방향각 계산
+  const aeCanvasAngle = Math.atan2(E[1] - A[1], E[0] - A[0]); // 음수 (위쪽)
+  // AF 방향 = 각 y
+  const afCanvasAngle = Math.atan2(F[1] - A[1], F[0] - A[0]);
+
+  // ── 배경 사각형 ──
+  ctx.fillStyle = 'rgba(200, 210, 230, 0.15)';
+  ctx.fillRect(A[0], C[1], B[0] - A[0], A[1] - C[1]);
+
+  // ── 보조선: E→G 수직 점선 ──
+  if (opts.aux) {
+    ctx.setLineDash([5, 4]);
+    ctx.strokeStyle = '#c0c0c0';
+    ctx.lineWidth = 1.2;
+    seg(E, G);
+    ctx.setLineDash([]);
+  }
+
+  // ── 회색 변 (비핵심) ──
+  gSeg(A, D);   // 왼쪽 변
+  gSeg(B, C);   // 오른쪽 변
+  gSeg(A, E);   // AE = 1 대각선
+  gSeg(A, F);   // AF (각 y 방향)
+  gSeg(E, F);   // EF
+
+  // ── 핵심변 3개 ──
+  keySeg(A, B, '#2563eb', 4); midTick(A, B, '#2563eb'); // AB 파랑
+  keySeg(D, E, '#dc2626', 4); midTick(D, E, '#dc2626'); // DE 빨강
+  keySeg(E, C, '#16a34a', 4); midTick(E, C, '#16a34a'); // EC 초록
+
+  // ── 직각 표시 at F ──
+  const sz = 7;
+  ctx.strokeStyle = '#9ca3af';
+  ctx.lineWidth = 1.2;
+  ctx.strokeRect(F[0] - sz, F[1] - sz, sz, sz);
+
+  // ── 각도 호 표시 ──
+  if (opts.angles) {
+    // 각 x: AB(오른쪽 수평)에서 AE 방향까지 시계방향 호
+    // canvas: 오른쪽 = 0, 위쪽 = -π/2
+    // aeCanvasAngle < 0 이므로 arc(A, r, aeCanvasAngle, 0)
+    ctx.strokeStyle = '#2563eb';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.arc(A[0], A[1], 42, aeCanvasAngle, 0); // 0 = 오른쪽(AB방향)
+    ctx.stroke();
+
+    // 각 y: AB에서 AF 방향까지
+    ctx.strokeStyle = '#d97706';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.arc(A[0], A[1], 26, afCanvasAngle, 0);
+    ctx.stroke();
+
+    // 레이블
+    ctx.font = 'bold 13px Noto Serif KR, serif';
+    // x 레이블: 호 중간 방향
+    const xMid = aeCanvasAngle / 2;
+    ctx.fillStyle = '#2563eb';
+    ctx.fillText('x', A[0] + 56 * Math.cos(xMid) - 5, A[1] + 56 * Math.sin(xMid) + 4);
+    // y 레이블
+    const yMid = afCanvasAngle / 2;
+    ctx.fillStyle = '#d97706';
+    ctx.fillText('y', A[0] + 30 * Math.cos(yMid) - 4, A[1] + 30 * Math.sin(yMid) + 4);
+  }
+
+  // ── 점 ──
+  drawDot(A, '#374151', 5);
+  drawDot(B, '#374151', 5);
+  drawDot(C, '#374151', 5);
+  drawDot(D, '#374151', 5);
+  drawDot(E, '#374151', 5);
+  drawDot(F, '#9ca3af', 4);
+  drawDot(G, '#9ca3af', 4);
+
+  // ── 점 이름 ──
+  if (opts.labels) {
+    ctx.font = 'bold 13px Noto Serif KR, serif';
+    label('A', A, '#374151', -15,  15);
+    label('B', B, '#374151',   7,  15);
+    label('C', C, '#374151',   7,  -6);
+    label('D', D, '#374151', -15,  -6);
+    label('E', E, '#374151',   3,  -8);
+    label('F', F, '#9ca3af',   8,   4);
+    label('G', G, '#9ca3af',   3,  15);
+  }
+
+  // ── "1" 레이블 (AE 중간, 선 왼쪽) ──
+  const midAE = [(A[0]+E[0])/2, (A[1]+E[1])/2];
+  ctx.save();
+  ctx.translate(midAE[0], midAE[1]);
+  ctx.rotate(aeCanvasAngle);
+  ctx.fillStyle = '#9ca3af';
+  ctx.font = '11px JetBrains Mono, monospace';
+  ctx.fillText('1', -4, -6);
+  ctx.restore();
+
+  // 슬라이더 값 표시
+  document.getElementById('vx').textContent = angX + '°';
+  document.getElementById('vy').textContent = angY + '°';
+}
+
+// ── 그리기 헬퍼 ──
+function seg(p1, p2) {
+  ctx.beginPath(); ctx.moveTo(p1[0],p1[1]); ctx.lineTo(p2[0],p2[1]); ctx.stroke();
+}
+function gSeg(p1, p2) {   // 회색 일반 변
+  ctx.strokeStyle = '#b0b7c3';
+  ctx.lineWidth = 1.8;
+  seg(p1, p2);
+}
+function keySeg(p1, p2, color, lw) {  // 핵심변
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lw;
+  seg(p1, p2);
+}
+function drawDot(p, color, r) {
+  ctx.fillStyle = color;
+  ctx.beginPath(); ctx.arc(p[0],p[1],r,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle = 'white'; ctx.lineWidth = 1.5; ctx.stroke();
+}
+function label(text, p, color, dx, dy) {
+  ctx.fillStyle = color;
+  ctx.fillText(text, p[0]+dx, p[1]+dy);
+}
+function midTick(p1, p2, color) {
+  const mx=(p1[0]+p2[0])/2, my=(p1[1]+p2[1])/2;
+  const ang = Math.atan2(p2[1]-p1[1], p2[0]-p1[0]) + Math.PI/2;
+  ctx.strokeStyle = color; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(mx+8*Math.cos(ang), my+8*Math.sin(ang));
+  ctx.lineTo(mx-8*Math.cos(ang), my-8*Math.sin(ang));
+  ctx.stroke();
+}
+
+draw();
+</script>
+</body>
+</html>
